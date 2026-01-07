@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: peculiar-query
+  namespace: sandbox-dev
+  labels:
+    app: peculiar-query
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peculiar-query
+  template:
+    metadata:
+      labels:
+        app: peculiar-query
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: DBNAME
+          value: "CriminalDB"
+        - name: DBUSER
+          value: "readonly"
+        - name: DBPASS
+          value: "readonlylmao"
+        - name: DBPORT
+          value: "5432"
+        - name: DBHOST
+          value: "127.0.0.1"
+        - name: FLAG
+          value: "FLAG_PLACEHOLDER"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: peculiar-query-service
+  namespace: sandbox-dev
+  labels:
+    app: peculiar-query
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: peculiar-query
