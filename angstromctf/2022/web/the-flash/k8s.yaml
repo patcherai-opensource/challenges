@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-flash-deployment
+  namespace: sandbox-dev
+  labels:
+    app: the-flash
+    component: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: the-flash
+      component: web
+  template:
+    metadata:
+      labels:
+        app: the-flash
+        component: web
+    spec:
+      containers:
+      - name: app
+        image: /:the-flash-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        env:
+        - name: NGINX_PORT
+          value: "80"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 101
+          runAsGroup: 101
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 101
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: the-flash-service
+  namespace: sandbox-dev
+  labels:
+    app: the-flash
+    component: web
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: the-flash
+    component: web
