@@ -31,4 +31,4 @@ def add():
 	response.set_cookie('contents', base64.b64encode(pickle.dumps(items)))
 	return response
 
-app.run(threaded=True, host="0.0.0.0")
+app.run(threaded=True, host="0.0.0.0", port=int(os.environ.get('PORT', '5000')))
