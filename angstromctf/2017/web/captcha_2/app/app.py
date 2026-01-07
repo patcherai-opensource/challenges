@@ -3,11 +3,13 @@ from forms import LoginForm
 
 from PIL import Image,ImageDraw
 import math,random
+import os
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False
 
-flag = 'actf{machine_learning_ftw_78B3DD}'
+# Get flag from environment variable, with fallback for development
+flag = os.environ.get('FLAG', 'actf{FLAG_PLACEHOLDER}')
 
 def rotate(point,angle):
 	return (point[0]*math.cos(angle)-point[1]*math.sin(angle),point[1]*math.cos(angle)+point[0]*math.sin(angle))
@@ -159,4 +161,6 @@ def add_header(response):
     return response
 
 if __name__ == '__main__':
-    app.run()
+    # Run on all interfaces and port 80 for Kubernetes
+    port = int(os.environ.get('PORT', 80))
+    app.run(host='0.0.0.0', port=port, debug=False)
