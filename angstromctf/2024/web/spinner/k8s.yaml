@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spinner
+  namespace: sandbox-dev
+  labels:
+    app: spinner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spinner
+  template:
+    metadata:
+      labels:
+        app: spinner
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: FLAG
+          value: "PLACEHOLDER_FLAG"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spinner
+  namespace: sandbox-dev
+  labels:
+    app: spinner
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: spinner
