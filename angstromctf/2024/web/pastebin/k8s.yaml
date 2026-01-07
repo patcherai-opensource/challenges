@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pastebin
+  namespace: sandbox-dev
+  labels:
+    app: pastebin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pastebin
+  template:
+    metadata:
+      labels:
+        app: pastebin
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: FLAG
+          value: "PLACEHOLDER_FLAG"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastebin
+  namespace: sandbox-dev
+  labels:
+    app: pastebin
+spec:
+  type: ClusterIP
+  selector:
+    app: pastebin
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
