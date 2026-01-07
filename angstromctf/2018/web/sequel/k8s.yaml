@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sequel-app
+  namespace: sandbox-dev
+  labels:
+    app: sequel-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sequel-app
+  template:
+    metadata:
+      labels:
+        app: sequel-app
+    spec:
+      containers:
+      - name: sequel-mysql
+        image: /:-mysql
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "3d5621a8dc3756ad7a97278d19c74d494db3b6963a6af0d5834c7fdf68dc8582"
+        - name: MYSQL_USER
+          value: "actf"
+        - name: MYSQL_PASSWORD
+          value: "prequelmemesarebetterthansequelmemes"
+        - name: MYSQL_DATABASE
+          value: "sequel_fan_club"
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 30
+      - name: sequel-app
+        image: /:-app
+        imagePullPolicy: Always
+        env:
+        - name: DB_HOST
+          value: "localhost"
+        - name: DB_USER
+          value: "actf"
+        - name: DB_PASSWORD
+          value: "prequelmemesarebetterthansequelmemes"
+        - name: FLAG
+          value: "FLAG_PLACEHOLDER"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "125m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 30
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sequel-app-service
+  namespace: sandbox-dev
+  labels:
+    app: sequel-app
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: sequel-app

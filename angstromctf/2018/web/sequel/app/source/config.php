@@ -1,4 +1,4 @@
 <?php
-$servername = "sequel-mysql";
-$username = "actf";
-$password = "prequelmemesarebetterthansequelmemes";
+$servername = getenv('DB_HOST') ?: "localhost";
+$username = getenv('DB_USER') ?: "actf";
+$password = getenv('DB_PASSWORD') ?: "prequelmemesarebetterthansequelmemes";
