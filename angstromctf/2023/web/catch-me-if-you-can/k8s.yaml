@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catch-me-if-you-can
+  namespace: sandbox-dev
+  labels:
+    app: catch-me-if-you-can
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catch-me-if-you-can
+  template:
+    metadata:
+      labels:
+        app: catch-me-if-you-can
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: FLAG
+          value: "FLAG_PLACEHOLDER"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catch-me-if-you-can-service
+  namespace: sandbox-dev
+  labels:
+    app: catch-me-if-you-can
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: catch-me-if-you-can
