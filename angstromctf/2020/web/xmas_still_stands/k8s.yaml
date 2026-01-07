@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xmas-still-stands
+  namespace: sandbox-dev
+  labels:
+    app: xmas-still-stands
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xmas-still-stands
+  template:
+    metadata:
+      labels:
+        app: xmas-still-stands
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: PORT
+          value: "3000"
+        - name: APP_HOST
+          value: "localhost"
+        - name: CAPTCHA_SITE
+          value: "6LfsiNsUAAAAANqwkmlw0xCemxE8eeb9j0vXju3p"
+        - name: CAPTCHA_SECRET
+          value: "6LfsiNsUAAAAAHexIOQu_OJugfE86YxpeD7Yxbol"
+        - name: FLAG
+          value: "PLACEHOLDER_FLAG"
+        - name: CHROME_FLAGS
+          value: "--no-sandbox|--disable-setuid-sandbox"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: false
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xmas-still-stands
+  namespace: sandbox-dev
+  labels:
+    app: xmas-still-stands
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: xmas-still-stands
