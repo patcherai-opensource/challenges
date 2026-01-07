@@ -11,7 +11,7 @@ Jack	He fell down and broke his crown.
 Jill	And she came tunbling after.
 Jonah	I'm running out of excuses.
 Jeff	Can we stop with the J names?
-aplet123	He's been hoarding the flag actf{qu3r7_s7r1ng5_4r3_0u7_70_g37_y0u}
+aplet123	He's been hoarding the flag FLAG_PLACEHOLDER
 \.
 GRANT CONNECT ON DATABASE "CriminalDB" TO readonly;
 GRANT USAGE ON SCHEMA public TO readonly;
