@@ -1,6 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(void) {
-    puts("actf{why_do_people_still_use_php}");
+    char *flag = getenv("FLAG");
+    if (flag != NULL) {
+        puts(flag);
+    } else {
+        puts("actf{default_flag_placeholder}");
+    }
     return 0;
 }
