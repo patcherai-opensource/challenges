@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: captcha2-deployment
+  namespace: sandbox-dev
+  labels:
+    app: captcha2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: captcha2
+  template:
+    metadata:
+      labels:
+        app: captcha2
+    spec:
+      containers:
+      - name: captcha2-app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        env:
+        - name: FLAG
+          value: "actf{FLAG_PLACEHOLDER}"
+        - name: PORT
+          value: "80"
+        - name: FLASK_APP
+          value: "app.py"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: captcha2-service
+  namespace: sandbox-dev
+  labels:
+    app: captcha2
+spec:
+  type: ClusterIP
+  selector:
+    app: captcha2
+  ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
+    name: http
