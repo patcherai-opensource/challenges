@@ -45,6 +45,11 @@ app.set("views", path.join(__dirname, "views"));
 app.get("/", function(req, res) {
     res.render("home");
 });
+
+// Health check endpoint for K8s
+app.get("/health", function(req, res) {
+    res.status(200).json({ status: "healthy", timestamp: Date.now() });
+});
 app.get("/post", function(req, res) {
     res.render("post", {
         postid: -1
@@ -104,19 +109,21 @@ async function visitPost(id) {
     });
     const page = await browser.newPage();
     const name = admins[Math.floor(Math.random() * admins.length)];
-    const dom = `127.0.0.1:${port}`;
+    // Use configurable host for K8s compatibility
+    const host = process.env.APP_HOST || "localhost";
+    const dom = `${host}:${port}`;
     await page.setCookie({
         name: "super_secret_admin_cookie",
         value: adminCookie,
         httpOnly: false,
         sameSite: "Lax",
-        domain: dom
+        domain: host
     }, {
         name: "admin_name",
         value: name,
         httpOnly: false,
         sameSite: "Lax",
-        domain: dom
+        domain: host
     });
     await page.setUserAgent(`${name}'s browser`);
     await page.goto(`http://${dom}/posts/${id}`, {waitUntil: "networkidle0"});
