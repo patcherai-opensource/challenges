@@ -3,11 +3,12 @@ from forms import LoginForm
 
 from PIL import Image, ImageDraw
 import math,random
+import os
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False
 
-flag = 'actf{comp_abstract_art_2F239B}'
+flag = os.environ.get('FLAG', 'FLAG{placeholder_flag}')
 
 def rotate(point,angle):
 	return (point[0]*math.cos(angle)-point[1]*math.sin(angle),point[1]*math.cos(angle)+point[0]*math.sin(angle))
@@ -157,4 +158,5 @@ def add_header(response):
     return response
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get('PORT', 80))
+    app.run(host='0.0.0.0', port=port, debug=False)
