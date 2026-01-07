@@ -1,4 +1,4 @@
-FROM node:13
+FROM node:22
 
 # Install curl for health check
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*

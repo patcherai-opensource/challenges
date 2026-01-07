@@ -1,4 +1,4 @@
-FROM php:7.0-apache
+FROM php:8.2-apache
 
 # Set environment variable for flag
 ENV FLAG="actf{placeholder_flag}"
