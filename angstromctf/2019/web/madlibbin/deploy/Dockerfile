@@ -5,9 +5,8 @@ WORKDIR /ctf
 
 RUN pip3 install -r requirements.txt
 
-ENV FLAG actf{traversed_the_world_and_the_seven_seas}
+ENV FLAG FLAG_PLACEHOLDER
 
 EXPOSE 3000
-LABEL options='{"network":"madlibbin"}'
 
 CMD ["gunicorn", "-c", "gunicorn.conf", "madlibbin:app"]

@@ -12,7 +12,7 @@ from flask import abort
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLAG')
 
-redis = redis.Redis(host='madlibbin_redis', port=6379, db=0)
+redis = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'), port=6379, db=0)
 
 generate = lambda: binascii.hexlify(os.urandom(16)).decode()
 parse = lambda x: list(dict.fromkeys(re.findall(r'(?<=\{args\[)[\w\-\s]+(?=\]\})', x)))
