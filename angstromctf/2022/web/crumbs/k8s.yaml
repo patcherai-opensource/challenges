@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crumbs
+  namespace: sandbox-dev
+  labels:
+    app: crumbs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crumbs
+  template:
+    metadata:
+      labels:
+        app: crumbs
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PORT
+          value: "8080"
+        - name: FLAG
+          value: "PLACEHOLDER_FLAG"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 10
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crumbs
+  namespace: sandbox-dev
+  labels:
+    app: crumbs
+spec:
+  type: ClusterIP
+  selector:
+    app: crumbs
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
