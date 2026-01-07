@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-good-deployment
+  namespace: sandbox-dev
+  labels:
+    app: git-good
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-good
+  template:
+    metadata:
+      labels:
+        app: git-good
+    spec:
+      containers:
+      - name: git-good-app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: PORT
+          value: "3000"
+        - name: NODE_ENV
+          value: "production"
+        - name: FLAG
+          value: "actf{placeholder_flag}"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-good-service
+  namespace: sandbox-dev
+  labels:
+    app: git-good
+spec:
+  type: ClusterIP
+  selector:
+    app: git-good
+  ports:
+  - port: 8080
+    targetPort: 3000
+    protocol: TCP
+    name: http
