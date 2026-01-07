@@ -26,13 +26,14 @@ echo("			<input style=\"font-size: 3em;\" type=\"text\" placeholder='Username' n
 	</body>
 </html>");
 } else {
+$flag = getenv('FLAG') ?: 'actf{sql_injection_more_like_prequel_injection}';
 echo("<!doctype html>
 <html>
 	<head>
 		<title>Prequel Fan Club</title>
 	</head>
 	<body style=\"background-image: url('images/background2.jpeg');\">
-		<h1 style=\"position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: red; background-color: yellow; font-family: sans-serif;\">actf{sql_injection_more_like_prequel_injection}</h1>
+		<h1 style=\"position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: red; background-color: yellow; font-family: sans-serif;\">".$flag."</h1>
 		<img src=\"images/anakin.jpg\"></img>
 		<img src=\"images/highground.jpg\"></img>
 		<img src=\"images/sand.jpg\"></img>
