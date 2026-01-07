@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: woooosh-app
+  namespace: sandbox-dev
+  labels:
+    app: woooosh
+    component: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: woooosh
+      component: app
+  template:
+    metadata:
+      labels:
+        app: woooosh
+        component: app
+    spec:
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3000"
+        - name: FLAG
+          value: "{{FLAG_PLACEHOLDER}}"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 10
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: woooosh-service
+  namespace: sandbox-dev
+  labels:
+    app: woooosh
+spec:
+  type: ClusterIP
+  selector:
+    app: woooosh
+    component: app
+  ports:
+  - port: 8080
+    targetPort: 3000
+    protocol: TCP
+    name: http
