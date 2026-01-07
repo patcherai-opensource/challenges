@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubi-flags-deployment
+  namespace: sandbox-dev
+  labels:
+    app: ubi-flags
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubi-flags
+  template:
+    metadata:
+      labels:
+        app: ubi-flags
+    spec:
+      containers:
+      - name: ubi
+        image: /:-ubi
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      - name: flags
+        image: /:-flags
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+        env:
+        - name: FLAG
+          value: "placeholder_flag_value"
+        - name: URL
+          value: "http://localhost:8080"
+        - name: UBI
+          value: "http://localhost:5000"
+        - name: ADMIN
+          value: "2881c2705e0f05729949439b5619cc78"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5001
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubi-flags-service
+  namespace: sandbox-dev
+  labels:
+    app: ubi-flags
+spec:
+  type: ClusterIP
+  ports:
+  - name: flags-port
+    port: 8080
+    targetPort: 5001
+    protocol: TCP
+  selector:
+    app: ubi-flags
