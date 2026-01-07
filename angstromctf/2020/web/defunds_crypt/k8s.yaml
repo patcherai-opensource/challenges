@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: defunds-crypt
+  namespace: sandbox-dev
+  labels:
+    app: defunds-crypt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: defunds-crypt
+  template:
+    metadata:
+      labels:
+        app: defunds-crypt
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: app
+        image: /:-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: FLAG
+          value: "FLAG_PLACEHOLDER"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: memories-storage
+          mountPath: /var/www/memories
+      volumes:
+      - name: memories-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: defunds-crypt-service
+  namespace: sandbox-dev
+  labels:
+    app: defunds-crypt
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: defunds-crypt
